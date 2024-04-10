@@ -25,6 +25,7 @@ module.exports = {
       'images.ctfassets.net',
       'cdn.builder.io',
       'cdn-sb.euw1.kibocommerce.com',
+      'cdn-sb.sandbox.kibong-qa.com',
     ],
     deviceSizes: [
       100, 240, 340, 380, 400, 450, 500, 550, 600, 640, 750, 828, 1080, 1200, 1920, 2048, 3840,
@@ -178,6 +179,7 @@ module.exports = {
     ],
   },
   serverRuntimeConfig: {
+    userCookieKey: process.env.KIBO_USER_COOKIE_KEY || 'kibo_at',
     currentUrl: process.env.CURRENT_DOMAIN,
     revalidate: process.env.GLOBAL_PAGE_REVALIDATE || 30,
     pageSize: 1000,

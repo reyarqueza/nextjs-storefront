@@ -74,7 +74,7 @@ export async function getStaticProps(
   const { publicRuntimeConfig } = getConfig()
   const { categoryCode } = params as { categoryCode: string }
   const categoriesTree = await getCategoryTree()
-  const category = await categoryTreeSearchByCode({ categoryCode }, categoriesTree)
+  const category = (await categoryTreeSearchByCode({ categoryCode }, categoriesTree)) as PrCategory
   if (!category) {
     return { notFound: true }
   }

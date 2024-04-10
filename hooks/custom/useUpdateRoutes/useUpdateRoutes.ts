@@ -16,7 +16,7 @@ const nonFilters = ['page', 'sort', 'search', 'itemsPerPage']
 export const useUpdateRoutes = () => {
   const router = useRouter()
 
-  const reduceFilters = (query: Record<string, string>) => (prev: {}, curr: string) => {
+  const reduceFilters = (query: Record<string, string>) => (prev: any, curr: string) => {
     const makeArray = Array.isArray(query[curr]) || nonFilters.includes(curr)
     return {
       ...prev,
@@ -59,8 +59,21 @@ export const useUpdateRoutes = () => {
       changeFilters(filters.join(','))
     }
   }
+
+  const changeQueryParam = async (queryParams: any) => {
+    await router.push(
+      {
+        pathname: router?.pathname,
+        query: queryParams,
+      },
+      undefined,
+      { scroll: false, shallow: true }
+    )
+  }
+
   return {
     updateRoute,
     changeFilters,
+    changeQueryParam,
   }
 }

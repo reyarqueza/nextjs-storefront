@@ -5,10 +5,10 @@ import CssBaseline from '@mui/material/CssBaseline'
 import { ThemeProvider } from '@mui/material/styles'
 import { HydrationBoundary } from '@tanstack/react-query'
 import creditCardType from 'credit-card-type'
-import Router from 'next/router'
+import Router, { useRouter } from 'next/router'
 
 import { GlobalFetchingIndicator } from '@/components/common'
-import { Footer, KiboHeader } from '@/components/layout'
+import { Footer, KiboHeader, Preview } from '@/components/layout'
 import {
   AuthContextProvider,
   ModalContextProvider,
@@ -27,6 +27,8 @@ creditCardType.updateCard('american-express', {
 })
 
 const DefaultLayout = ({ pageProps, children }: { pageProps: any; children: ReactElement }) => {
+  const router = useRouter()
+
   useEffect(() => {
     const handleRouteChange = (url: any) => {
       const isMyAccountPage = url.includes('/my-account')
@@ -74,6 +76,7 @@ const DefaultLayout = ({ pageProps, children }: { pageProps: any; children: Reac
                   {children}
                 </Container>
                 <Footer content={pageProps.footer} />
+                {router?.isPreview && <Preview />}
               </Stack>
             </HeaderContextProvider>
           </AuthContextProvider>

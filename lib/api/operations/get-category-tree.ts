@@ -15,17 +15,15 @@ export default async function getCategoryTree(req?: NextApiRequest) {
     const cachedItems = cache.get(cacheKey)
     if (cachedItems) return cachedItems
 
-    if (!cachedItems) {
-      const headers = req ? getAdditionalHeader(req) : {}
+    const headers = req ? getAdditionalHeader(req) : {}
 
-      const response = await fetcher({ query: getCategoryTreeQuery, variables: {} }, { headers })
-      const items = response?.data?.categoriesTree?.items
-      if (items.length) {
-        cache.set(cacheKey, items, cacheTimeOut)
-      }
-
-      return items
+    const response = await fetcher({ query: getCategoryTreeQuery, variables: {} }, { headers })
+    const items = response?.data?.categoriesTree?.items
+    if (items.length) {
+      cache.set(cacheKey, items, cacheTimeOut)
     }
+
+    return items
   } catch (error) {
     console.log(error)
   }

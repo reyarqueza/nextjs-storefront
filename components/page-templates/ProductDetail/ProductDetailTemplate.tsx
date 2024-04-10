@@ -26,6 +26,7 @@ import {
   Price,
   QuantitySelector,
 } from '@/components/common'
+import SkeletonWrapper from '@/components/common/SkeletonWrapper/SkeletonWrapper'
 import { KiboBreadcrumbs, ImageGallery } from '@/components/core'
 import { AddToCartDialog, StoreLocatorDialog } from '@/components/dialogs'
 import {
@@ -45,7 +46,6 @@ import {
   useWishlist,
   useGetProductInventory,
   usePriceRangeFormatter,
-  useGetProductPrice,
 } from '@/hooks'
 import { FulfillmentOptions as FulfillmentOptionsConstant, PurchaseTypes } from '@/lib/constants'
 import { productGetters, subscriptionGetters, wishlistGetters } from '@/lib/getters'
@@ -58,7 +58,6 @@ import type {
   ProductOption,
   ProductOptionValue,
   CrProduct,
-  ProductPrice,
 } from '@/lib/gql/types'
 
 interface ProductDetailTemplateProps {
@@ -119,20 +118,15 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
   } = props
   const { t } = useTranslation('common')
 
-  const isDigitalFulfillment = product.fulfillmentTypesSupported?.some(
+  const isDigitalFulfillment = product?.fulfillmentTypesSupported?.some(
     (type) => type === FulfillmentOptionsConstant.DIGITAL
   )
 
   const [purchaseType, setPurchaseType] = useState<string>(PurchaseTypes.ONETIMEPURCHASE)
   const [selectedFrequency, setSelectedFrequency] = useState<string>('')
-  const [isSubscriptionPricingSelected, setIsSubscriptionPricingSelected] = useState<boolean>(false)
 
   const isSubscriptionModeAvailable = subscriptionGetters.isSubscriptionModeAvailable(product)
   const isSubscriptionOnly = subscriptionGetters.isSubscriptionOnly(product)
-  const { data: productPriceResponse } = useGetProductPrice(
-    product?.productCode as string,
-    isSubscriptionPricingSelected
-  )
 
   const { showModal, closeModal } = useModalContext()
   const { addToCart } = useAddCartItem()
@@ -145,9 +139,11 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
     quantity,
     updatedShopperEnteredValues,
     selectedFulfillmentOption,
-    setQuantity,
+    isPriceLoading,
     selectProductOption,
     setSelectedFulfillmentOption,
+    handleQuantity,
+    setIsSubscriptionPricingSelected,
   } = useProductDetailTemplate({
     product,
     purchaseLocation,
@@ -169,16 +165,13 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
     optionsVisibility,
     properties,
     isValidForOneTime,
-  } = productGetters.getProductDetails(
-    {
-      ...currentProduct,
-      fulfillmentMethod: isDigitalFulfillment
-        ? FulfillmentOptionsConstant.DIGITAL
-        : selectedFulfillmentOption?.method,
-      purchaseLocationCode: selectedFulfillmentOption?.location?.code as string,
-    },
-    productPriceResponse?.price as ProductPrice
-  )
+  } = productGetters.getProductDetails({
+    ...currentProduct,
+    fulfillmentMethod: isDigitalFulfillment
+      ? FulfillmentOptionsConstant.DIGITAL
+      : selectedFulfillmentOption?.method,
+    purchaseLocationCode: selectedFulfillmentOption?.location?.code as string,
+  })
   const { data: locationInventory } = useGetProductInventory(
     (variationProductCode || productCode) as string,
     selectedFulfillmentOption?.location?.code as string
@@ -389,16 +382,27 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
         <ImageGallery images={productGallery as ProductImage[]} title={''} />
       </Grid>
       <Grid item xs={12} md={6} sx={{ width: '100%', pl: { xs: 0, md: 5 } }}>
-        <Typography variant="h1" gutterBottom>
-          {productName}
-        </Typography>
-        <Price
-          price={t<string>('currency', { val: productPrice.regular })}
-          {...(productPrice.special && {
-            salePrice: t<string>('currency', { val: productPrice.special }),
-          })}
-          priceRange={usePriceRangeFormatter(productPriceRange)}
-        />
+        <SkeletonWrapper
+          isLoading={!productName}
+          skeletonProps={{ variant: 'text', width: 150, height: 40, animation: 'wave' }}
+        >
+          <Typography variant="h1" gutterBottom>
+            {productName}
+          </Typography>
+        </SkeletonWrapper>
+        <SkeletonWrapper
+          isLoading={isPriceLoading || !productPrice}
+          skeletonProps={{ variant: 'text', width: 60, animation: 'wave' }}
+        >
+          <Price
+            price={t<string>('currency', { val: productPrice.regular })}
+            {...(productPrice.special && {
+              salePrice: t<string>('currency', { val: productPrice.special }),
+            })}
+            priceRange={usePriceRangeFormatter(productPriceRange)}
+          />
+        </SkeletonWrapper>
+
         <Box paddingY={1} display={shortDescription ? 'block' : 'none'}>
           <Box
             data-testid="short-description"
@@ -504,8 +508,8 @@ const ProductDetailTemplate = (props: ProductDetailTemplateProps) => {
           <QuantitySelector
             label="Qty"
             quantity={quantity}
-            onIncrease={() => setQuantity((prevQuantity: number) => Number(prevQuantity) + 1)}
-            onDecrease={() => setQuantity((prevQuantity: number) => Number(prevQuantity) - 1)}
+            onIncrease={() => handleQuantity(quantity + 1)}
+            onDecrease={() => handleQuantity(quantity - 1)}
           />
         </Box>
         {isSubscriptionModeAvailable && (

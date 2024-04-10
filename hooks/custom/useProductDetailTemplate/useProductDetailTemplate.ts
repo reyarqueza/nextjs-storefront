@@ -3,11 +3,16 @@
  */
 import { useEffect, useState } from 'react'
 
-import { useConfigureProduct } from '@/hooks'
+import { useConfigureProduct, useGetProductPrice } from '@/hooks'
 import { productGetters } from '@/lib/getters'
 import type { LocationCustom, ProductCustom } from '@/lib/types'
 
-import type { ConfiguredProduct, Location, ProductOptionSelectionInput } from '@/lib/gql/types'
+import type {
+  ConfiguredProduct,
+  Location,
+  ProductOption,
+  ProductOptionSelectionInput,
+} from '@/lib/gql/types'
 
 interface UseProductDetailTemplateProps {
   product: ProductCustom
@@ -45,9 +50,16 @@ export const useProductDetailTemplate = (props: UseProductDetailTemplateProps) =
     location: {},
   })
 
+  const [isSubscriptionPricingSelected, setIsSubscriptionPricingSelected] = useState<boolean>(false)
+
+  const { data: productPriceResponse, isLoading: isPriceLoading } = useGetProductPrice(
+    currentProduct?.productCode as string,
+    isSubscriptionPricingSelected
+  )
+
   useEffect(() => {
-    setCurrentProduct(product)
-  }, [product?.productCode])
+    setCurrentProduct({ ...product, ...productPriceResponse })
+  }, [product, productPriceResponse])
 
   useEffect(() => {
     if (purchaseLocation?.name || selectedFulfillmentOption?.location?.name) {
@@ -126,6 +138,7 @@ export const useProductDetailTemplate = (props: UseProductDetailTemplateProps) =
         price,
       }: ConfiguredProduct = await configureProduct.mutateAsync({
         productCode,
+        quantity,
         updatedOptions: updatedOptions.map((option) => {
           return {
             attributeFQN: option.attributeFQN,
@@ -165,6 +178,49 @@ export const useProductDetailTemplate = (props: UseProductDetailTemplateProps) =
     }
   }
 
+  const handleQuantity = async (qty: number) => {
+    setQuantity(qty)
+    const {
+      options,
+      variationProductCode,
+      purchasableState,
+      productImages,
+      inventoryInfo,
+      priceRange,
+      price,
+    }: ConfiguredProduct = await configureProduct.mutateAsync({
+      productCode,
+      quantity: qty,
+      updatedOptions: currentProduct.options
+        ?.filter((option) => {
+          return option?.values?.find((value) => {
+            return value?.isSelected
+          })
+        })
+        .map((each) => {
+          const selected = each?.values?.find((value) => value?.isSelected)
+          return {
+            attributeFQN: each?.attributeFQN,
+            shopperEnteredValue: selected?.shopperEnteredValue,
+            value: selected?.value,
+          }
+        }) as ProductOption[],
+    })
+    setCurrentProduct({
+      ...currentProduct,
+      priceRange,
+      price,
+      variationProductCode: variationProductCode,
+      options: options,
+      purchasableState: purchasableState,
+      inventoryInfo,
+      content: {
+        ...currentProduct.content,
+        productImages: productImages,
+      },
+    })
+  }
+
   return {
     currentProduct,
     quantity,
@@ -173,5 +229,8 @@ export const useProductDetailTemplate = (props: UseProductDetailTemplateProps) =
     setQuantity,
     selectProductOption,
     setSelectedFulfillmentOption,
+    handleQuantity,
+    setIsSubscriptionPricingSelected,
+    isPriceLoading,
   }
 }
