@@ -23,6 +23,7 @@ module.exports = {
       'cdn-sb.mozu.com',
       'encrypted-tbn0.gstatic.com',
       'images.ctfassets.net',
+      'd2ybw0k096aut6.cloudfront.net',
       'cdn.builder.io',
       'cdn-sb.euw1.kibocommerce.com',
       'cdn-sb.sandbox.kibong-qa.com',
@@ -201,6 +202,11 @@ module.exports = {
     },
     B2BQuotes: {
       pageSize: 5,
+    },
+    paypal: {
+      clientId: 'Kibo Commerce',
+      currency: process.env.NEXT_PUBLIC_PAYPAL_CURRENCY || 'USD',
+      intent: 'authorize',
     },
   },
   staticPageGenerationTimeout: 1000,
