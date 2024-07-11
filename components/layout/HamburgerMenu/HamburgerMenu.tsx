@@ -11,6 +11,7 @@ import {
   Link as MuiLink,
   Typography,
 } from '@mui/material'
+import { getCookie } from 'cookies-next'
 import { useRouter } from 'next/router'
 import { useTranslation } from 'next-i18next'
 
@@ -30,6 +31,8 @@ interface HamburgerMenuProps {
   setIsDrawerOpen: (isDrawerOpen: boolean) => void
   onAccountIconClick: () => void
   requestAccountIconComponent?: React.ReactNode
+  isCSR: boolean
+  customerName: string
 }
 
 const styles = {
@@ -67,11 +70,14 @@ const HamburgerMenu = (props: HamburgerMenuProps) => {
     navLinks,
     onAccountIconClick,
     requestAccountIconComponent,
+    isCSR,
+    customerName,
   } = props
   const { getCategoryLink } = uiHelpers()
   const { t } = useTranslation('common')
   const { isAuthenticated, user } = useAuthContext()
   const router = useRouter()
+  const userName = isAuthenticated ? user?.firstName : isCSR ? customerName : ''
 
   const toggleDrawer = (open: boolean) => {
     setIsDrawerOpen(open)
@@ -106,37 +112,40 @@ const HamburgerMenu = (props: HamburgerMenuProps) => {
             >
               <Box width="100%">
                 <HeaderAction
-                  title={isAuthenticated ? `${t('hi')}, ${user?.firstName}` : t('my-account')}
-                  subtitle={isAuthenticated ? t('go-to-my-account') : t('log-in')}
+                  title={userName ? `${t('hi')}, ${userName}` : t('my-account')}
+                  subtitle={isCSR ? '' : isAuthenticated ? t('go-to-my-account') : t('log-in')}
                   icon={AccountCircle}
                   mobileIconColor="black"
                   iconFontSize="large"
                   showTitleInMobile={true}
                   onClick={onAccountIconClick}
                   isElementVisible={true}
+                  data-testid="Account-Icon"
+                  isCSR={Boolean(isCSR)}
                 />
               </Box>
             </CategoryNestedNavigation>
           </Box>
           <Box sx={{ ...styles.spacer }}></Box>
           <List sx={{ ...styles.navLinksList }}>
-            {navLinks?.map((nav) => (
-              <Box key={nav.text}>
-                <MuiLink underline="none">
-                  <ListItem button sx={{ paddingInline: 4 }}>
-                    <ListItemText
-                      primary={
-                        <Typography variant="body2" color="text.primary">
-                          {t(`${nav.text}`)}
-                        </Typography>
-                      }
-                      onClick={() => handleNavLinks(nav.link)}
-                    />
-                  </ListItem>
-                </MuiLink>
-                <Divider />
-              </Box>
-            ))}
+            {!isCSR &&
+              navLinks?.map((nav) => (
+                <Box key={nav.text}>
+                  <MuiLink underline="none">
+                    <ListItem button sx={{ paddingInline: 4 }}>
+                      <ListItemText
+                        primary={
+                          <Typography variant="body2" color="text.primary">
+                            {t(`${nav.text}`)}
+                          </Typography>
+                        }
+                        onClick={() => handleNavLinks(nav.link)}
+                      />
+                    </ListItem>
+                  </MuiLink>
+                  <Divider />
+                </Box>
+              ))}
           </List>
           {requestAccountIconComponent}
         </Box>

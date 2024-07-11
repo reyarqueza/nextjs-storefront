@@ -1,7 +1,8 @@
 import React from 'react'
 
 import SearchIcon from '@mui/icons-material/Search'
-import { Box } from '@mui/material'
+import { Box, NoSsr } from '@mui/material'
+import { getCookie } from 'cookies-next'
 import Link from 'next/link'
 import { useTranslation } from 'next-i18next'
 
@@ -23,39 +24,44 @@ const MobileHeader = ({ children }: { children?: React.ReactNode }) => {
   const { toggleMobileSearchPortal } = useHeaderContext()
   const { t } = useTranslation('common')
 
+  const isCSR = getCookie('isCSR')
   return (
     <>
-      <Box sx={MobileHeaderStyles.container} data-testid="mobile-header">
-        <HamburgerIcon
-          size="medium"
-          mobileIconColor="black"
-          isElementVisible={true}
-          data-testid="mobile-header-hamburger-icon"
-        />
+      <NoSsr>
+        <Box sx={MobileHeaderStyles.container} data-testid="mobile-header">
+          <HamburgerIcon
+            size="medium"
+            mobileIconColor="black"
+            isElementVisible={true}
+            data-testid="mobile-header-hamburger-icon"
+          />
 
-        <HeaderAction
-          title={t('search')}
-          icon={SearchIcon}
-          iconFontSize={'medium'}
-          mobileIconColor="black"
-          onClick={() => toggleMobileSearchPortal()}
-          data-testid="mobile-header-search-icon"
-        />
+          <HeaderAction
+            title={t('search')}
+            icon={SearchIcon}
+            iconFontSize={'medium'}
+            mobileIconColor="black"
+            onClick={() => toggleMobileSearchPortal()}
+            data-testid="mobile-header-search-icon"
+          />
 
-        <Box position="relative">
-          <Link href="/" passHref>
-            <KiboLogo small />
-          </Link>
+          <Box position="relative">
+            <Link href="/" passHref>
+              <KiboLogo small />
+            </Link>
+          </Box>
+
+          {!isCSR && (
+            <StoreFinderIcon
+              size="medium"
+              mobileIconColor="black"
+              data-testid="mobile-header-store-icon"
+            />
+          )}
+          <CartIcon size="medium" mobileIconColor="black" data-testid="mobile-header-cart-icon" />
         </Box>
-
-        <StoreFinderIcon
-          size="medium"
-          mobileIconColor="black"
-          data-testid="mobile-header-store-icon"
-        />
-        <CartIcon size="medium" mobileIconColor="black" data-testid="mobile-header-cart-icon" />
-      </Box>
-      {children}
+        {children}
+      </NoSsr>
     </>
   )
 }

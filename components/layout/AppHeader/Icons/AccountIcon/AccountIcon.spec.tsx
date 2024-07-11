@@ -25,6 +25,8 @@ const setup = (isAuthenticated = false) => {
         size="large"
         onAccountIconClick={handleAccountIconClickMock}
         isElementVisible={true}
+        isCSR={false}
+        customerName=""
       />
     </AuthContext.Provider>
   )

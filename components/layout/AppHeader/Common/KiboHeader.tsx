@@ -10,7 +10,9 @@ import {
   useTheme,
   styled,
   Theme,
+  NoSsr,
 } from '@mui/material'
+import { getCookie } from 'cookies-next'
 import getConfig from 'next/config'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
@@ -51,6 +53,9 @@ interface HeaderActionAreaProps {
   onAccountRequestClick: () => void
 }
 
+const isCSR = getCookie('isCSR')
+const customerName = getCookie('customer')?.toString() || ''
+
 const HeaderActionArea = (props: HeaderActionAreaProps) => {
   const { isHeaderSmall, onAccountIconClick, onAccountRequestClick } = props
   const { headerState, toggleSearchBar } = useHeaderContext()
@@ -85,21 +90,34 @@ const HeaderActionArea = (props: HeaderActionAreaProps) => {
             <KiboLogo />
           </Link>
         </Box>
-
-        <Box display="flex" flex={1} justifyContent={'flex-end'} gap={2}>
-          <StoreFinderIcon size={isHeaderSmall ? 'small' : 'medium'} />
-          <AccountIcon
-            size={isHeaderSmall ? 'small' : 'medium'}
-            onAccountIconClick={onAccountIconClick}
-          />
-          <AccountRequestIcon
-            onClick={onAccountRequestClick}
-            isElementVisible={false}
-            iconProps={{ fontSize: isHeaderSmall ? 'small' : 'medium' }}
-            buttonText={t('b2b-account-request')}
-          />
-          <CartIcon size={isHeaderSmall ? 'small' : 'medium'} />
-        </Box>
+        <NoSsr>
+          <Box display="flex" flex={1} justifyContent={'flex-end'} gap={1}>
+            {!isCSR && (
+              <>
+                <StoreFinderIcon
+                  size={isHeaderSmall ? 'small' : 'medium'}
+                  data-testid="Store-FinderIcon"
+                />
+                <AccountRequestIcon
+                  onClick={onAccountRequestClick}
+                  isElementVisible={false}
+                  iconProps={{ fontSize: isHeaderSmall ? 'small' : 'medium' }}
+                  buttonText={t('b2b-account-request')}
+                  data-testid="Account-Request-Icon"
+                />
+              </>
+            )}
+            <AccountIcon
+              size={isHeaderSmall ? 'small' : 'medium'}
+              onAccountIconClick={onAccountIconClick}
+              data-testid="Account-Icon"
+              isElementVisible={isCSR ? true : false}
+              isCSR={Boolean(isCSR)}
+              customerName={customerName}
+            />
+            <CartIcon size={isHeaderSmall ? 'small' : 'medium'} />
+          </Box>
+        </NoSsr>
       </Container>
     </Box>
   )
@@ -116,17 +134,20 @@ const TopHeader = ({ navLinks }: { navLinks: NavigationLink[] }) => {
   return (
     <Box sx={{ ...topHeaderStyles.wrapper }} data-testid="top-bar">
       <Container maxWidth="xl" sx={{ ...topHeaderStyles.container }}>
-        <Box display="flex" justifyContent="flex-end" alignItems="center" gap={5}>
-          {navLinks?.map((nav, index) => {
-            return (
-              <Box key={index}>
-                <StyledLink href={nav.link} passHref>
-                  {t(`${nav.text}`)}
-                </StyledLink>
-              </Box>
-            )
-          })}
-        </Box>
+        <NoSsr>
+          <Box display="flex" justifyContent="flex-end" alignItems="center" gap={5}>
+            {!isCSR &&
+              navLinks?.map((nav, index) => {
+                return (
+                  <Box key={index}>
+                    <StyledLink href={nav.link} passHref>
+                      {t(`${nav.text}`)}
+                    </StyledLink>
+                  </Box>
+                )
+              })}
+          </Box>
+        </NoSsr>
       </Container>
     </Box>
   )
@@ -205,6 +226,8 @@ const KiboHeader = (props: KiboHeaderProps) => {
             setIsDrawerOpen={() => toggleHamburgerMenu()}
             navLinks={navLinks}
             onAccountIconClick={handleAccountIconClick}
+            isCSR={Boolean(isCSR)}
+            customerName={customerName}
           />
         </MobileHeader>
       )
