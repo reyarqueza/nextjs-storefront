@@ -42,9 +42,10 @@ export const useGetB2BAccountHierarchy = (
   const { isLoading, isSuccess, isError, data } = useQuery({
     queryKey: accountHierarchyKeys.accountHierarchy(accountId),
     queryFn: () => getB2BAccountHierarchy(accountId),
-    enabled: !!accountId && Boolean(initialData?.accounts.length),
+    enabled: !!accountId,
     placeholderData: (previousData) => previousData ?? undefined,
     initialData,
+    retry: 0,
   })
 
   return {

@@ -26,9 +26,14 @@ type CustomerAccountWithRole = CustomerAccount & {
 export interface AuthContextType {
   isAuthenticated: boolean
   user?: CustomerAccountWithRole
+  accountsByUser?: number[]
+  selectedAccountId?: number
   login: (params: LoginData, onSuccessCallBack: () => void) => any
   createAccount: (params: RegisterAccountInputData, onSuccessCallBack?: () => void) => any
   logout: () => void
+  setAccountsByUser?: (accounts: any[]) => void
+  setSelectedAccountId?: (accountId: number) => void
+  setUser?: (user: CustomerAccountWithRole | undefined) => void
 }
 interface AuthContextProviderProps {
   children: ReactNode
@@ -37,9 +42,14 @@ interface AuthContextProviderProps {
 const initialState = {
   isAuthenticated: false,
   user: undefined,
+  accountsByUser: [],
+  selectedAccountId: 0,
   login: () => null,
   createAccount: () => null,
   logout: () => '',
+  setAccountsByUser: () => null,
+  setSelectedAccountId: () => null,
+  setUser: () => null,
 }
 
 export const AuthContext = createContext(initialState as AuthContextType)
@@ -48,13 +58,14 @@ AuthContext.displayName = 'AuthContext'
 export const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false)
   const [user, setUser] = useState<CustomerAccountWithRole | undefined>(undefined)
+  const [accountsByUser, setAccountsByUser] = useState<any[]>([])
+  const [selectedAccountId, setSelectedAccountId] = useState<number>(0)
   const { showSnackbar } = useSnackbarContext()
   const isCSR = getCookie('isCSR')
   const router = useRouter()
 
   const { mutate } = useLogin()
   const { mutate: logOutUser } = useLogout(() => {
-    setUser(undefined)
     deleteCookie('behaviors', {
       path: '/',
     })
@@ -130,10 +141,12 @@ export const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
     const userCredentials = {
       username: params?.formData?.email,
       password: params?.formData?.password,
+      accountId: params?.formData?.accountId && parseInt(params?.formData?.accountId),
     }
     mutate(userCredentials, {
       onSuccess: (account: any) => {
         handleOnSuccess(account, onSuccessCallBack)
+        setSelectedAccountId(parseInt(account.customerAccount.id))
       },
     })
   }
@@ -152,15 +165,20 @@ export const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
   const values = {
     isAuthenticated,
     user,
+    accountsByUser,
+    selectedAccountId,
     login,
     createAccount,
     setUser,
     logout,
+    setAccountsByUser,
+    setSelectedAccountId,
   }
 
   useEffect(() => {
     if (customerAccount) {
       setUser(customerAccount)
+      setSelectedAccountId(customerAccount?.id)
     }
   }, [customerAccount])
 

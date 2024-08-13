@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 
+import { KeyboardArrowDownOutlined } from '@mui/icons-material'
 import {
   Collapse,
   Box,
@@ -32,6 +33,7 @@ import {
   MobileHeader,
   SearchSuggestions,
   StoreFinderIcon,
+  SwitchAccountMenu,
 } from '@/components/layout'
 import { useAuthContext, useHeaderContext, useModalContext } from '@/context'
 import { useCreateCustomerB2bAccountMutation, useGetCategoryTree } from '@/hooks'
@@ -61,6 +63,20 @@ const HeaderActionArea = (props: HeaderActionAreaProps) => {
   const { headerState, toggleSearchBar } = useHeaderContext()
   const { isMobileSearchPortalVisible, isSearchBarVisible } = headerState
   const { t } = useTranslation('common')
+
+  const [anchorElAccountOptions, setAnchorElAccountOptions] = React.useState<null | HTMLElement>(
+    null
+  )
+  const openAccountOptions = Boolean(anchorElAccountOptions)
+
+  const { selectedAccountId, accountsByUser, user } = useAuthContext()
+
+  const handleAccountOptionsClick = (event: any) => {
+    setAnchorElAccountOptions(event.currentTarget)
+  }
+  const handleClose = () => {
+    setAnchorElAccountOptions(null)
+  }
 
   const showSearchBarInLargeHeader = !isHeaderSmall || isSearchBarVisible
   return (
@@ -107,14 +123,34 @@ const HeaderActionArea = (props: HeaderActionAreaProps) => {
                 />
               </>
             )}
-            <AccountIcon
-              size={isHeaderSmall ? 'small' : 'medium'}
-              onAccountIconClick={onAccountIconClick}
-              data-testid="Account-Icon"
-              isElementVisible={isCSR ? true : false}
-              isCSR={Boolean(isCSR)}
-              customerName={customerName}
-            />
+            <Box display={'flex'} justifyContent={'center'} alignItems={'center'}>
+              <AccountIcon
+                size={isHeaderSmall ? 'small' : 'medium'}
+                onAccountIconClick={onAccountIconClick}
+                data-testid="Account-Icon"
+                isElementVisible={true}
+                isCSR={Boolean(isCSR)}
+                customerName={customerName}
+                companyOrOrganization={user?.companyOrOrganization as string}
+              />
+              {selectedAccountId && accountsByUser && accountsByUser?.length > 1 && (
+                <KeyboardArrowDownOutlined
+                  onClick={handleAccountOptionsClick}
+                  aria-controls={openAccountOptions ? 'account-menu' : undefined}
+                  aria-haspopup="true"
+                  aria-expanded={openAccountOptions ? 'true' : undefined}
+                  sx={{
+                    color: 'grey.900',
+                  }}
+                />
+              )}
+              <SwitchAccountMenu
+                open={openAccountOptions}
+                handleClose={handleClose}
+                anchorEl={anchorElAccountOptions}
+              />
+            </Box>
+
             <CartIcon size={isHeaderSmall ? 'small' : 'medium'} />
           </Box>
         </NoSsr>
@@ -136,16 +172,17 @@ const TopHeader = ({ navLinks }: { navLinks: NavigationLink[] }) => {
       <Container maxWidth="xl" sx={{ ...topHeaderStyles.container }}>
         <NoSsr>
           <Box display="flex" justifyContent="flex-end" alignItems="center" gap={5}>
-            {!isCSR &&
-              navLinks?.map((nav, index) => {
-                return (
+            {!isCSR && (
+              <>
+                {navLinks?.map((nav, index) => (
                   <Box key={index}>
                     <StyledLink href={nav.link} passHref>
                       {t(`${nav.text}`)}
                     </StyledLink>
                   </Box>
-                )
-              })}
+                ))}
+              </>
+            )}
           </Box>
         </NoSsr>
       </Container>
@@ -157,7 +194,7 @@ const KiboHeader = (props: KiboHeaderProps) => {
   const { navLinks, categoriesTree: initialCategoryTree, isSticky = true } = props
   const { data: categoriesTree } = useGetCategoryTree(initialCategoryTree)
   const { headerState, toggleMobileSearchPortal, toggleHamburgerMenu } = useHeaderContext()
-  const { isAuthenticated } = useAuthContext()
+  const { isAuthenticated, user } = useAuthContext()
   const { showModal, closeModal } = useModalContext()
   const { t } = useTranslation('common')
   const router = useRouter()
@@ -228,6 +265,7 @@ const KiboHeader = (props: KiboHeaderProps) => {
             onAccountIconClick={handleAccountIconClick}
             isCSR={Boolean(isCSR)}
             customerName={customerName}
+            companyOrOrganization={user?.companyOrOrganization as string}
           />
         </MobileHeader>
       )

@@ -5,8 +5,7 @@ import { useTranslation } from 'next-i18next'
 
 import { KiboDialog } from '@/components/common'
 import { RegisterAccountDialog, ResetPasswordDialog } from '@/components/layout'
-import LoginContent, { LoginData } from '@/components/layout/Login/LoginContent/LoginContent'
-import { useAuthContext } from '@/context'
+import LoginContent from '@/components/layout/Login/LoginContent/LoginContent'
 import { useModalContext } from '@/context/ModalContext'
 
 export interface LoginFooterProps {
@@ -42,7 +41,7 @@ const LoginFooter = (props: LoginFooterProps) => {
 const LoginDialog = () => {
   const { t } = useTranslation('common')
 
-  const { login } = useAuthContext()
+
   const { showModal, closeModal } = useModalContext()
 
   const onRegisterClick = () => {
@@ -53,14 +52,14 @@ const LoginDialog = () => {
     showModal({ Component: ResetPasswordDialog })
   }
 
-  const handleLogin = (params: LoginData) => {
-    login(params, closeModal)
-  }
-
   return (
     <KiboDialog
       Title={t('log-in')}
-      Content={<LoginContent onLogin={handleLogin} onForgotPasswordClick={onForgotPassword} />}
+      Content={
+        <LoginContent
+          onForgotPasswordClick={onForgotPassword}
+        />
+      }
       Actions={<LoginFooter onRegisterNow={onRegisterClick} />}
       customMaxWidth="32.375rem"
       onClose={closeModal}

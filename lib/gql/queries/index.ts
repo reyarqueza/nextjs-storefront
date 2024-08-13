@@ -22,6 +22,7 @@ export { default as getCheckoutDestinationQuery } from './checkout/get-checkout-
 export { default as getSubscriptionsQuery } from './subscription/get-subscriptions-query'
 
 export { default as getCustomerAccountsQuery } from './get-customer-accounts'
+export { default as getCustomerAccount } from './get-customer-account'
 //multiship
 export { default as getMultiShipCheckoutQuery } from './checkout/get-multi-ship-checkout-query'
 export { default as getCheckoutShippingMethodsQuery } from './checkout/get-multi-ship-checkout-shipping-methods'
@@ -36,4 +37,5 @@ export { default as getQuotes } from './b2b/get-quotes'
 export { default as getQuoteByIDQuery } from './quotes/get-quote-by-id'
 export { default as getQuoteShippingMethodsQuery } from './quotes/get-quote-shipping-rates'
 export { default as getB2BAccount } from './b2b/get-b2b-account'
+export { default as getAccountsByUser } from './b2b/get-accounts-by-user'
 export { default as getOneTimeSecretQuery } from './cart-takeover/getOneTimeSecretQuery'

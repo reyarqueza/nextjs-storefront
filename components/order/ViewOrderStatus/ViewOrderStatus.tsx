@@ -26,6 +26,7 @@ export interface OrderStatusFormDataProps {
 }
 
 export interface ViewOrderStatusProps {
+  billingEmail: string
   lookupErrorMessage?: string
   lookupWarningMessage?: string
   onOrderStatusSubmit: (data: OrderStatusFormDataProps) => void
@@ -45,16 +46,12 @@ const useViewOrderStatusSchema = () => {
     billingEmail: yup
       .string()
       .email(t('billing-email-must-be-a-valid-email'))
-      .when('$isAuthenticated', (isAuthenticated, schema) => {
-        if (!isAuthenticated) {
-          return schema.required(t('billing-email-is-required'))
-        }
-      }),
+      .required(t('billing-email-is-required')),
   })
 }
 
 const ViewOrderStatus = (props: ViewOrderStatusProps) => {
-  const { onOrderStatusSubmit, lookupErrorMessage, lookupWarningMessage } = props
+  const { onOrderStatusSubmit, lookupErrorMessage, lookupWarningMessage, billingEmail } = props
   const { t } = useTranslation('common')
 
   const theme = useTheme()
@@ -77,7 +74,6 @@ const ViewOrderStatus = (props: ViewOrderStatusProps) => {
   const onValid = async (formData: OrderStatusFormDataProps) =>
     onOrderStatusSubmit({
       ...formData,
-      billingEmail: isAuthenticated ? (user?.emailAddress as string) : formData.billingEmail,
     })
 
   return (
@@ -119,26 +115,24 @@ const ViewOrderStatus = (props: ViewOrderStatusProps) => {
               )}
             />
 
-            {!isAuthenticated && (
-              <Controller
-                name="billingEmail"
-                control={control}
-                render={({ field }) => (
-                  <KiboTextBox
-                    {...field}
-                    value={field.value || ''}
-                    label={t('billing-email')}
-                    ref={null}
-                    error={!!errors?.billingEmail}
-                    helperText={errors?.billingEmail?.message}
-                    onChange={(_name, value) => field.onChange(value)}
-                    onBlur={field.onBlur}
-                    required={true}
-                    sx={{ maxWidth: '421px' }}
-                  />
-                )}
-              />
-            )}
+            <Controller
+              name="billingEmail"
+              control={control}
+              render={({ field }) => (
+                <KiboTextBox
+                  {...field}
+                  value={field.value || ''}
+                  label={t('billing-email')}
+                  ref={null}
+                  error={!!errors?.billingEmail}
+                  helperText={errors?.billingEmail?.message}
+                  onChange={(_name, value) => field.onChange(value)}
+                  onBlur={field.onBlur}
+                  required={true}
+                  sx={{ maxWidth: '421px' }}
+                />
+              )}
+            />
           </Stack>
 
           <Button

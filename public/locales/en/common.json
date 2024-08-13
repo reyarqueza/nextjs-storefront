@@ -124,6 +124,7 @@
   "my-profile": "My Profile",
   "logout": "Log Out",
   "go-to-my-account": "Go to My Account",
+  "go-to": "Go to ",
   "your-default-payment-method": "Your Default Payment Method",
   "previously-saved-payment-methods": "Previously saved payment methods",
   "no-previously-saved-payment-methods": "No previously saved payment methods.",
@@ -531,5 +532,7 @@
   "menu": "Menu",
   "remove-payPal": "Remove PayPal",
   "loading-paypal": "Loading PayPal...",
-  "error-cartTakeover": "Error while fetching the cart. Please close the window and try again."
+  "error-cartTakeover": "Error while fetching the cart. Please close the window and try again.",
+  "accounts": "Accounts",
+  "switch-account-message": "Are you sure you want to switch the account?"
 }
