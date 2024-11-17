@@ -2,7 +2,7 @@ import { muiTheme } from 'storybook-addon-material-ui5'
 import { INITIAL_VIEWPORTS } from '@storybook/addon-viewport'
 import { initialize, mswDecorator } from 'msw-storybook-addon'
 import { setConfig } from 'next/config'
-import * as NextImage from 'next/image'
+import * as NextImage from "next/legacy/image"
 import { I18nextProvider } from 'react-i18next'
 import { QueryClientProvider } from '@tanstack/react-query'
 import * as handlers from '../__mocks__/msw/handlers'

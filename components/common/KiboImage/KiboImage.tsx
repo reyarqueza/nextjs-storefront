@@ -1,7 +1,7 @@
 import { SyntheticEvent } from 'react'
 
 import { SvgIconComponent } from '@mui/icons-material'
-import Image, { ImageProps } from 'next/image'
+import Image, { ImageProps } from "next/legacy/image"
 
 import DefaultImage from '@/public/product_placeholder.svg'
 
